@@ -14,6 +14,7 @@ const featuredGames = [
   { id: "game-crash", name: "Краш", emoji: "🚀", desc: "Не упусти ракету", color: "from-orange-500 to-red-500", badge: "HOT" },
   { id: "game-number", name: "Угадай число", emoji: "🔮", desc: "Читаешь мысли?", color: "from-violet-600 to-purple-400", badge: "" },
   { id: "game-dice", name: "Кости", emoji: "🎲", desc: "Бросай и побеждай", color: "from-teal-600 to-cyan-400", badge: "" },
+  { id: "game-loto", name: "Лотерея", emoji: "🎟️", desc: "Выиграй 10000 D!", color: "from-yellow-500 to-orange-500", badge: "NEW" },
 ];
 
 const stats = [

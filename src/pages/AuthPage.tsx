@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { type Page } from "@/App";
+import { type Page, type User } from "@/App";
 import Icon from "@/components/ui/icon";
+import { authApi, setToken } from "@/lib/api";
 
 interface Props {
-  onLogin: () => void;
+  onLogin: (user: User, token: string) => void;
   navigate: (p: Page) => void;
 }
 
@@ -12,16 +13,33 @@ export default function AuthPage({ onLogin, navigate }: Props) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onLogin();
+    setError(null);
+    setLoading(true);
+
+    try {
+      let data;
+      if (mode === "register") {
+        data = await authApi.register(name, email, password);
+      } else {
+        data = await authApi.login(email, password);
+      }
+      setToken(data.token);
+      onLogin(data.user, data.token);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Произошла ошибка");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="min-h-[calc(100vh-64px)] flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md animate-scale-in">
-        {/* Header */}
         <div className="text-center mb-8">
           <div className="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-purple-600 to-blue-500 flex items-center justify-center text-4xl mb-4 animate-float shadow-2xl"
             style={{ boxShadow: "0 0 40px rgba(168,85,247,0.4)" }}>
@@ -33,13 +51,10 @@ export default function AuthPage({ onLogin, navigate }: Props) {
           </p>
         </div>
 
-        {/* Card */}
         <div className="card-game p-8 neon-border-purple border">
-
-          {/* Toggle */}
           <div className="flex rounded-xl overflow-hidden mb-8 glass p-1 gap-1">
             <button
-              onClick={() => setMode("login")}
+              onClick={() => { setMode("login"); setError(null); }}
               className={`flex-1 py-2.5 rounded-lg text-sm font-bold font-exo transition-all ${
                 mode === "login"
                   ? "bg-purple-600 text-white shadow-lg"
@@ -49,7 +64,7 @@ export default function AuthPage({ onLogin, navigate }: Props) {
               Войти
             </button>
             <button
-              onClick={() => setMode("register")}
+              onClick={() => { setMode("register"); setError(null); }}
               className={`flex-1 py-2.5 rounded-lg text-sm font-bold font-exo transition-all ${
                 mode === "register"
                   ? "bg-purple-600 text-white shadow-lg"
@@ -60,42 +75,12 @@ export default function AuthPage({ onLogin, navigate }: Props) {
             </button>
           </div>
 
-          {/* Social Auth */}
-          <div className="space-y-3 mb-6">
-            <p className="text-xs text-gray-500 text-center font-exo mb-3">Войди через соц. сети</p>
-
-            <button
-              onClick={onLogin}
-              className="w-full glass border border-blue-500/30 hover:border-blue-400/60 text-white py-3 rounded-xl flex items-center justify-center gap-3 font-exo font-semibold text-sm transition-all hover:bg-blue-500/10"
-            >
-              <span className="text-xl">✈️</span>
-              Войти через Telegram
-            </button>
-
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                onClick={onLogin}
-                className="glass border border-red-500/20 hover:border-red-400/40 text-white py-3 rounded-xl flex items-center justify-center gap-2 font-exo font-semibold text-sm transition-all hover:bg-red-500/10"
-              >
-                <span>🔴</span> Google
-              </button>
-              <button
-                onClick={onLogin}
-                className="glass border border-blue-600/30 hover:border-blue-500/50 text-white py-3 rounded-xl flex items-center justify-center gap-2 font-exo font-semibold text-sm transition-all hover:bg-blue-600/10"
-              >
-                <span>🔷</span> VK
-              </button>
+          {error && (
+            <div className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-sm font-exo text-center">
+              {error}
             </div>
-          </div>
+          )}
 
-          {/* Divider */}
-          <div className="flex items-center gap-3 mb-6">
-            <div className="flex-1 h-px bg-purple-900/40" />
-            <span className="text-xs text-gray-600 font-exo">или через email</span>
-            <div className="flex-1 h-px bg-purple-900/40" />
-          </div>
-
-          {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
             {mode === "register" && (
               <div>
@@ -105,6 +90,7 @@ export default function AuthPage({ onLogin, navigate }: Props) {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="КосмоИгрок"
+                  required
                   className="w-full bg-black/30 border border-purple-800/40 focus:border-purple-500 rounded-xl px-4 py-3 text-white placeholder-gray-600 outline-none transition-colors font-exo text-sm"
                 />
               </div>
@@ -117,6 +103,7 @@ export default function AuthPage({ onLogin, navigate }: Props) {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
+                required
                 className="w-full bg-black/30 border border-purple-800/40 focus:border-purple-500 rounded-xl px-4 py-3 text-white placeholder-gray-600 outline-none transition-colors font-exo text-sm"
               />
             </div>
@@ -128,16 +115,27 @@ export default function AuthPage({ onLogin, navigate }: Props) {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
+                required
+                minLength={4}
                 className="w-full bg-black/30 border border-purple-800/40 focus:border-purple-500 rounded-xl px-4 py-3 text-white placeholder-gray-600 outline-none transition-colors font-exo text-sm"
               />
             </div>
 
             <button
               type="submit"
-              className="w-full btn-primary py-3.5 rounded-xl font-bold font-exo text-sm mt-2 flex items-center justify-center gap-2"
+              disabled={loading}
+              className="w-full btn-primary py-3.5 rounded-xl font-bold font-exo text-sm mt-2 flex items-center justify-center gap-2 disabled:opacity-50"
             >
-              <Icon name={mode === "login" ? "LogIn" : "Rocket"} size={18} />
-              {mode === "login" ? "Войти в казино" : "Создать аккаунт + 1000 D-COIN 🎁"}
+              {loading ? (
+                <span className="animate-spin">⏳</span>
+              ) : (
+                <Icon name={mode === "login" ? "LogIn" : "Rocket"} size={18} />
+              )}
+              {loading
+                ? "Загрузка..."
+                : mode === "login"
+                ? "Войти в казино"
+                : "Создать аккаунт + 1000 D-COIN 🎁"}
             </button>
           </form>
 

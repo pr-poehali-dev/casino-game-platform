@@ -84,6 +84,19 @@ const games = [
     maxWin: "x30",
     category: "Удача"
   },
+  {
+    id: "game-loto",
+    name: "Лотерея",
+    emoji: "🎟️",
+    desc: "Купи билет и участвуй в розыгрыше! 3 призовых места: 10000, 5000 и 1000 D-COIN.",
+    color: "from-yellow-500 to-orange-500",
+    borderColor: "border-yellow-500/40",
+    badge: "NEW",
+    badgeColor: "bg-yellow-500",
+    minBet: 100,
+    maxWin: "10000",
+    category: "Удача"
+  },
 ];
 
 const categories = ["Все", "Удача", "Стратегия", "Риск", "Интуиция"];
@@ -101,7 +114,7 @@ export default function GamesPage({ navigate }: Props) {
         <h1 className="font-orbitron text-4xl font-black text-white mb-3">
           🎮 <span className="neon-text-purple">Игровой</span> <span className="neon-text-blue">зал</span>
         </h1>
-        <p className="text-gray-400 font-exo">6 игр · Только D-COIN · Без риска реальных денег</p>
+        <p className="text-gray-400 font-exo">7 игр · Только D-COIN · Без риска реальных денег</p>
       </div>
 
       {/* Categories */}

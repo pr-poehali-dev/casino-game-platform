@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Layout from "@/components/Layout";
 import HomePage from "@/pages/HomePage";
 import AuthPage from "@/pages/AuthPage";
@@ -14,6 +14,8 @@ import BlackjackGame from "@/pages/games/BlackjackGame";
 import NumberGame from "@/pages/games/NumberGame";
 import DiceGame from "@/pages/games/DiceGame";
 import CrashGame from "@/pages/games/CrashGame";
+import LotoGame from "@/pages/games/LotoGame";
+import { authApi, clearToken } from "@/lib/api";
 
 export type Page =
   | "home"
@@ -29,7 +31,8 @@ export type Page =
   | "game-blackjack"
   | "game-number"
   | "game-dice"
-  | "game-crash";
+  | "game-crash"
+  | "game-loto";
 
 export interface User {
   id: string;
@@ -48,31 +51,52 @@ export interface User {
 }
 
 const defaultUser: User = {
-  id: "usr_001",
-  name: "КосмоИгрок",
+  id: "",
+  name: "",
   avatar: "🚀",
-  balance: 10000,
-  level: 7,
-  xp: 3400,
-  xpMax: 5000,
-  totalWon: 45200,
-  totalGames: 142,
-  winStreak: 3,
-  joinDate: "2026-01-15",
-  subscription: "vip",
-  achievements: ["first_win", "lucky_streak", "high_roller", "daily_bonus"],
+  balance: 0,
+  level: 1,
+  xp: 0,
+  xpMax: 1000,
+  totalWon: 0,
+  totalGames: 0,
+  winStreak: 0,
+  joinDate: "2026-01-01",
+  subscription: "free",
+  achievements: [],
 };
 
 export default function App() {
   const [page, setPage] = useState<Page>("home");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState<User>(defaultUser);
+  const [authLoading, setAuthLoading] = useState(true);
+
+  useEffect(() => {
+    const token = localStorage.getItem("dcoin_token");
+    if (token) {
+      authApi.me().then((data) => {
+        if (data.user) {
+          setUser(data.user);
+          setIsLoggedIn(true);
+        } else {
+          clearToken();
+        }
+      }).catch(() => {
+        clearToken();
+      }).finally(() => {
+        setAuthLoading(false);
+      });
+    } else {
+      setAuthLoading(false);
+    }
+  }, []);
 
   const navigate = (p: Page) => {
     const protectedPages = [
       "profile", "games", "leaderboard", "shop", "bonus",
       "game-slots", "game-roulette", "game-blackjack",
-      "game-number", "game-dice", "game-crash"
+      "game-number", "game-dice", "game-crash", "game-loto"
     ];
     if (protectedPages.includes(p) && !isLoggedIn) {
       setPage("auth");
@@ -82,19 +106,34 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const login = () => {
+  const login = (userData: User) => {
+    setUser(userData);
     setIsLoggedIn(true);
     setPage("home");
   };
 
   const logout = () => {
+    authApi.logout().catch(() => {});
+    clearToken();
     setIsLoggedIn(false);
+    setUser(defaultUser);
     setPage("home");
   };
 
   const updateBalance = (delta: number) => {
     setUser((prev) => ({ ...prev, balance: Math.max(0, prev.balance + delta) }));
   };
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen grid-lines flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-5xl animate-float mb-4">🎰</div>
+          <p className="font-orbitron text-purple-400 text-lg">DCOIN</p>
+        </div>
+      </div>
+    );
+  }
 
   const renderPage = () => {
     switch (page) {
@@ -112,6 +151,7 @@ export default function App() {
       case "game-number": return <NumberGame user={user} updateBalance={updateBalance} navigate={navigate} />;
       case "game-dice": return <DiceGame user={user} updateBalance={updateBalance} navigate={navigate} />;
       case "game-crash": return <CrashGame user={user} updateBalance={updateBalance} navigate={navigate} />;
+      case "game-loto": return <LotoGame user={user} updateBalance={updateBalance} navigate={navigate} />;
       default: return <HomePage navigate={navigate} isLoggedIn={isLoggedIn} user={user} />;
     }
   };
