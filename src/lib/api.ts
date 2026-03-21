@@ -13,12 +13,12 @@ export function clearToken() {
   localStorage.removeItem("dcoin_token");
 }
 
-async function request(baseUrl: string, path: string, method: "GET" | "POST" = "GET", body?: unknown) {
+async function request(baseUrl: string, action: string, method: "GET" | "POST" = "GET", body?: unknown) {
   const headers: Record<string, string> = { "Content-Type": "application/json" };
   const token = getToken();
   if (token) headers["Authorization"] = `Bearer ${token}`;
 
-  const url = `${baseUrl}${path}`;
+  const url = `${baseUrl}?action=${action}`;
   const res = await fetch(url, {
     method,
     headers,
@@ -32,19 +32,19 @@ async function request(baseUrl: string, path: string, method: "GET" | "POST" = "
 
 export const authApi = {
   register: (name: string, email: string, password: string) =>
-    request(AUTH_URL, "/register", "POST", { name, email, password }),
+    request(AUTH_URL, "register", "POST", { name, email, password }),
   login: (email: string, password: string) =>
-    request(AUTH_URL, "/login", "POST", { email, password }),
-  me: () => request(AUTH_URL, "/me", "GET"),
-  logout: () => request(AUTH_URL, "/logout", "POST"),
+    request(AUTH_URL, "login", "POST", { email, password }),
+  me: () => request(AUTH_URL, "me", "GET"),
+  logout: () => request(AUTH_URL, "logout", "POST"),
 };
 
 export const lotoApi = {
-  status: () => request(LOTO_URL, "/status", "GET"),
-  buy: (quantity: number) => request(LOTO_URL, "/buy", "POST", { quantity }),
-  draw: () => request(LOTO_URL, "/draw", "POST"),
-  myTickets: () => request(LOTO_URL, "/my-tickets", "GET"),
-  history: () => request(LOTO_URL, "/history", "GET"),
+  status: () => request(LOTO_URL, "status", "GET"),
+  buy: (quantity: number) => request(LOTO_URL, "buy", "POST", { quantity }),
+  draw: () => request(LOTO_URL, "draw", "POST"),
+  myTickets: () => request(LOTO_URL, "my-tickets", "GET"),
+  history: () => request(LOTO_URL, "history", "GET"),
 };
 
 export default { authApi, lotoApi };
