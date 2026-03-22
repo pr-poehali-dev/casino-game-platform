@@ -225,7 +225,7 @@ export default function ShopPage({ user, updateBalance, navigate: _navigate }: P
           </div>
           <div className="text-center">
             <div className="text-gray-500 font-exo text-xs line-through mb-1">19 000 D-COIN</div>
-            <div className="font-orbitron text-3xl neon-text-gold font-black">13 300</div>
+            <div className="font-orbitron text-3xl neon-text-gold font-black">49999</div>
             <div className="text-yellow-700 text-xs font-exo">D-COIN</div>
             <button className="btn-gold mt-3 px-6 py-2.5 rounded-xl font-bold font-exo text-sm">
               Купить набор
