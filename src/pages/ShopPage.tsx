@@ -187,7 +187,7 @@ export default function ShopPage({ user, updateBalance, navigate: _navigate }: P
               <p className="text-xs text-gray-600 font-exo mb-3 flex-1">{item.desc}</p>
 
               <div className="flex items-center justify-between mb-3">
-                <span className="font-orbitron text-sm neon-text-gold font-bold">{item.price.toLocaleString()} D</span>
+                <span className="font-orbitron text-sm neon-text-gold font-bold">1000</span>
                 <span className={`text-xs px-2 py-0.5 rounded-full glass font-exo ${
                   item.category === "Бусты" ? "text-blue-400 border border-blue-500/20" :
                   item.category === "Аватары" ? "text-purple-400 border border-purple-500/20" :
